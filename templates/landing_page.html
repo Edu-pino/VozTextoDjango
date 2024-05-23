@@ -1,0 +1,87 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplicación de Conversión de Voz</title>
+    <!-- Incluir Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Adirek+Sans:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Radio+Canada:ital,wght@0,300..700;1,300..700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+    <div class="btn-container">
+        <!-- Botón para abrir el modal -->
+        <button id="send-button" class="btn btn-primary btn-custom" data-toggle="modal" data-target="#emailModal">Enviar</button>
+        <a href="{% url 'start' %}"><button id="exit-button" class="btn btn-danger btn-custom">Salir</button></a>
+    </div>
+
+    <div class="container py-5">
+        <h1 class="text-center mb-4">Aplicación de Conversión de Voz</h1>
+        
+        <div class="card-deck">
+            <div class="card shadow">
+                <div class="card-body text-center">
+                    <h2 class="card-title">Voz a Texto</h2>
+                    <textarea id="voice-output" class="form-control" placeholder="El texto transcrito aparecerá aquí..." rows="4" readonly></textarea>
+                    <button id="start-recording" class="btn btn-success mt-2">Iniciar Micrófono</button>
+                    <button id="stop-recording" class="btn btn-danger mt-2">Detener Micrófono</button>
+                </div>
+            </div>
+    
+            <div class="card shadow">
+                <div class="card-body text-center">
+                    <h2 class="card-title">Texto a Voz</h2>
+                    <textarea id="text-input" class="form-control" placeholder="Introduce texto para convertirlo en voz..." rows="4"></textarea>
+                    <button id="convert-text" class="btn btn-primary mt-2">Convertir Texto a Voz</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel de Registros -->
+        <div class="card shadow mt-4">
+            <div class="card-body">
+                <h3 class="card-title text-center">Registro de Mensajes</h3>
+                <ul id="message-log" class="list-group">
+                    <!-- Aquí se añadirán los mensajes dinámicamente -->
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para ingresar correo electrónico -->
+    <div class="modal fade" id="emailModal" tabindex="-1" role="dialog" aria-labelledby="emailModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="emailModalLabel">Enviar Correo</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="emailForm">
+                        <div class="form-group">
+                            <label for="emailAddress">Dirección de Correo Electrónico</label>
+                            <input type="email" class="form-control" id="emailAddress" required>
+                        </div>
+                        <button type="submit" class="btn btn-success">Enviar Correo</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <audio id="audio-player" src="" style="display: none;" controls></audio>
+    
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<!--<script src="../js/app.js"></script>
+ --></body>
+</html>

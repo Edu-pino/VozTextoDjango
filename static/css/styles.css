@@ -1,0 +1,49 @@
+body {
+    font-family: 'Radio Canada'; /* Tipografía */
+    background-image: url('../img/imagenfondo_landing.JPG');
+}
+
+.btn {
+    margin-top: 10px; /* Espaciado superior para separar de otros elementos */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Sombra suave para dar profundidad */
+    transition: background-color 0.3s ease; /* Transición suave de color */
+}
+
+.btn:hover {
+    background-color: #0056b3; /* Cambio de color al pasar el cursor */
+}
+
+.btn-success:hover {
+    background-color: darkgreen; /* Cambio de color al pasar el cursor */
+}
+
+.btn-danger:hover {
+    background-color: darkred; /* Cambio de color al pasar el cursor */
+}
+
+.form-control {
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.1); /* Sombra interior para mejorar la percepción de profundidad */
+}
+
+h1, h2 {
+    color: #004AAD; /* Color de texto más oscuro para mejor contraste */
+}
+
+#message-log {
+    max-height: 200px; /* Altura máxima del contenedor del registro */
+    overflow-y: auto; /* Activa el scroll vertical si el contenido excede la altura máxima */
+    overflow-x: hidden; /* Evita el scroll horizontal */
+}
+
+/* Estilo para el contenedor de los botones */
+.btn-container {
+    position: absolute;
+    right: 0;
+    top: 0;
+    margin: 10px;
+}
+
+/* Estilo para los botones, opcional si quieres más personalización */
+.btn-custom {
+    margin-left: 5px; /* Espacio entre los botones */
+}
