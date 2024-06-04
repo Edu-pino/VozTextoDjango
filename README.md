@@ -14,9 +14,3 @@ python manage.py startproject VozTextoDjango
 python manage.py startapp appTextoVoz
 
 python manage.py startapp appVozTexto
-
-
-### Clonar el repositorio
-```bash
-git clone https://github.com/tu-usuario/tu-repositorio.git
-cd tu-repositorio
