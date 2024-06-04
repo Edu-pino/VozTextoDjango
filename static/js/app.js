@@ -1,126 +1,137 @@
 document.addEventListener('DOMContentLoaded', function () {
+    // Obtiene las referencias a los elementos del DOM que se utilizarán
     const stopRecordingButton = document.getElementById('stop-recording');
     const convertTextButton = document.getElementById('convert-text');
     const voiceOutput = document.getElementById('voice-output');
     const textInput = document.getElementById('text-input');
     const messageLog = document.getElementById('message-log');
 
-    // Función para añadir mensajes al registro
+    // Función para añadir mensajes al registro de mensajes
     function addToLog(message) {
         const date = new Date();
+        // Formatea la fecha y hora actuales
         const dateString = `${date.toLocaleDateString('es-ES')} ${date.toLocaleTimeString('es-ES')}`;
+        // Crea un nuevo elemento de lista y lo agrega al registro de mensajes
         const newEntry = document.createElement('li');
         newEntry.classList.add('list-group-item');
         newEntry.textContent = `${dateString}: ${message}`;
         messageLog.appendChild(newEntry);
     }
 
-    // Manejar el evento de detención del micrófono y añadir al registro
+    // Maneja el evento de clic en el botón de detener grabación
     stopRecordingButton.addEventListener('click', function () {
         const message = voiceOutput.value.trim();
         if (message) {
-            addToLog(message);
+            addToLog(message); // Agrega el mensaje al registro
         }
-        voiceOutput.value = ''; // Limpiar el área de texto después de guardar el mensaje
-        recognition.stop();
+        voiceOutput.value = ''; // Limpia el área de texto después de guardar el mensaje
+        recognition.stop(); // Detiene el reconocimiento de voz
     });
 
-    // Creación de una nueva instancia de webkitSpeechRecognition.
+    // Crea una nueva instancia de webkitSpeechRecognition para reconocimiento de voz
     var recognition = new webkitSpeechRecognition();
+    recognition.continuous = true; // Permite el reconocimiento continuo de voz
+    recognition.interimResults = true; // Permite resultados intermedios
+    var transcript = ''; // Almacena la transcripción final
+    var interimTranscript = ''; // Almacena la transcripción intermedia
 
-    // Configuración de reconocimiento continuo y resultados intermedios.
-    recognition.continuous = true;
-    recognition.interimResults = true;
-
-    // Almacenamiento de la transcripción entre los eventos de resultado.
-    var transcript = '';
-    var interimTranscript = '';
-
-    // Evento ejecutado al iniciar el reconocimiento de voz.
     recognition.onstart = function() {
         console.log('El reconocimiento de voz ha comenzado.');
-        transcript = ''; // Reiniciar la transcripción al comenzar
+        transcript = ''; // Reinicia la transcripción cuando comienza el reconocimiento
     };
 
-    // Manejo de errores durante el reconocimiento de voz.
     recognition.onerror = function(event) {
-        console.error('Error de reconocimiento de voz:', event.error);
+        console.error('Error de reconocimiento de voz:', event.error); // Maneja errores durante el reconocimiento de voz
     };
 
-    // Procesamiento de los resultados del reconocimiento de voz.
     recognition.onresult = function(event) {
-        interimTranscript = ''; // Limpiar el interimTranscript cada vez que lleguen nuevos resultados
+        interimTranscript = ''; // Reinicia la transcripción intermedia
+        // Itera sobre los resultados del reconocimiento de voz
         for (var i = event.resultIndex; i < event.results.length; i++) {
             if (event.results[i].isFinal) {
-                transcript += event.results[i][0].transcript;
+                transcript += event.results[i][0].transcript; // Agrega a la transcripción final si es un resultado final
             } else {
-                interimTranscript += event.results[i][0].transcript;
+                interimTranscript += event.results[i][0].transcript; // Agrega a la transcripción intermedia si no es final
             }
         }
-        console.log('Transcripción:', transcript + interimTranscript);
-        // Actualización del valor de un elemento HTML con la transcripción completa.
-        document.getElementById('voice-output').value = transcript + interimTranscript;
+        voiceOutput.value = transcript + interimTranscript; // Actualiza el área de texto con la transcripción
     };
 
-    // Evento ejecutado al finalizar el reconocimiento de voz.
     recognition.onend = function() {
         console.log('El reconocimiento de voz ha finalizado.');
-        // Optional: reiniciar automáticamente el reconocimiento para simular un reconocimiento realmente continuo
-        //recognition.start();  // Descomenta esta línea si quieres que se reinicie automáticamente.
     };
 
-    // Botón para iniciar el reconocimiento de voz.
+    // Maneja el evento de clic en el botón de iniciar grabación
     document.getElementById('start-recording').addEventListener('click', function() {
-        recognition.start();
+        recognition.start(); // Inicia el reconocimiento de voz
     });
 
-    // Manejar el evento de conversión de texto a voz y añadir al log
+    // Maneja el evento de clic en el botón de convertir texto a voz
     $("#convert-text").on("click", function() {
         const message = $("#text-input").val().trim();
         if (message) {
-            addToLog(message);  // Añadir mensaje al log antes de enviarlo
-
-            // Realizar la solicitud AJAX
+            addToLog(message); // Agrega el mensaje al registro de mensajes
             $.ajax({
                 type: "GET",
-                url: 'http://127.0.0.1:8000/convert-text-to-voice',
-                data: {text: message},
-                success: function(respuesta) {
-                    console.log(respuesta);
-                    var timeStamp = new Date().getTime();
-                    $("#audio-player").get(0).src = '../media/mi_archivo.wav?' + timeStamp;
-                    $("#audio-player").get(0).load();
-                    $("#audio-player").get(0).play();
+                url: '127.0.1:8000/text-to-voice', // URL del endpoint de conversión de texto a voz
+                data: {text: message}, // Datos enviados en la solicitud (texto a convertir)
+                success: function(response) {
+                    if(response.success) {
+                        console.log('Respuesta del servidor:', response.message);
+                        var timeStamp = new Date().getTime();
+                        // Actualiza la fuente del reproductor de audio con el archivo creado y lo reproduce
+                        $("#audio-player").attr('src', `/media/mi_archivo.wav?${timeStamp}`);
+                        $("#audio-player").get(0).play();
+                    } else {
+                        alert('Error al convertir texto a voz: ' + response.message); // Muestra un mensaje de error si la conversión falla
+                    }
                 },
+                error: function(xhr, status, error) {
+                    console.error('Error AJAX:', status, error);
+                    alert('Error al conectar con el servicio: ' + xhr.responseText); // Muestra un mensaje de error si la solicitud falla
+                }
             });
         }
-
-        // Limpiar el área de texto después de guardar el mensaje y enviar la solicitud
-        $("#text-input").val('');
+        $("#text-input").val(''); // Limpia el campo de entrada de texto después de enviar
     });
-});
 
-// Manejar el evento de envío de correo electrónico
-document.getElementById('emailForm').addEventListener('submit', function(event) {
-    event.preventDefault(); // Prevenir el envío normal del formulario
+    // Maneja el envío del formulario de correo electrónico
+    document.getElementById('emailForm').addEventListener('submit', function(event) {
+        event.preventDefault(); // Previene el comportamiento predeterminado del formulario
+        var emailAddress = document.getElementById('emailAddress').value;
+        var content = document.getElementById('message-log').innerText;
 
-    var emailAddress = document.getElementById('emailAddress').value;
-    var content = document.getElementById('message-log').innerText; // Asumiendo que quieres enviar el contenido del log
+        $.ajax({
+            url: '/send-mail/', // URL del endpoint de envío de correo
+            type: 'POST',
+            contentType: 'application/json',
+            headers: {'X-CSRFToken': getCookie('csrftoken')}, // Añadir CSRF Token desde cookies para Django
+            data: JSON.stringify({ email: emailAddress, content: content }), // Datos enviados en la solicitud (correo y contenido)
+            success: function(data) {
+                console.log('Respuesta del servidor:', data);
+                $('#emailModal').modal('hide'); // Oculta el modal de correo
+                alert('Correo enviado exitosamente!'); // Muestra un mensaje de éxito
+            },
+            error: function(xhr, status, error) {
+                console.error('Error:', error);
+                alert('Error al enviar correo: ' + xhr.responseText); // Muestra un mensaje de error si el envío falla
+            }
+        });
+    });
 
-    // Usar AJAX de jQuery para enviar los datos
-    $.ajax({
-        url: 'http://127.0.0.1:8000/send-mail/', // Asegúrate de que la URL es correcta
-        type: 'POST',
-        contentType: 'application/json',
-        data: JSON.stringify({ email: emailAddress, message: content }),
-        success: function(data) {
-            console.log('Respuesta del servidor:', data);
-            $('#emailModal').modal('hide'); // Cerrar el modal después de enviar
-            alert('Correo enviado exitosamente!'); // Feedback positivo al usuario
-        },
-        error: function(xhr, status, error) {
-            console.error('Error:', error);
-            alert('Error al enviar correo: ' + xhr.responseText); // Feedback de error al usuario
+    // Función para obtener el valor de la cookie CSRF
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
         }
-    });
+        return cookieValue;
+    }
 });
